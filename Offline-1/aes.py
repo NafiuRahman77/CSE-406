@@ -129,7 +129,8 @@ def aes_for_one_chunk(chunk, key):
             state[i][j] = hex(int(state[i][j], 16) ^ int(
                 round_key[i][j], 16))[2:].zfill(2)
 
-    for round in range(1, 2):
+    for round in range(1, 11):
+        print("round", round)
         #schedule my round key
         w = [[round_key[j][i] for j in range(4)] for i in range(4)]
         # circular left shift of w[3]
@@ -157,7 +158,7 @@ def aes_for_one_chunk(chunk, key):
                     w[j][k] = hex(int(w[j][k], 16) ^ int(w[j-1][k], 16))[2:].zfill(2)
         
         round_key= [[w[j][i] for j in range(4)] for i in range(4)]
-        print(round_key)    
+        print("round key", round_key)    
 
         # substitute bytes
         for j in range(4):
@@ -171,23 +172,24 @@ def aes_for_one_chunk(chunk, key):
             [BitVector(hexstring=element) for element in row]
             for row in state
         ]
-
-        #mix columns using Bitvector library
-        temp_=[]
-        for _ in range(len(matrix)):
-            temp_.append([BitVector(intVal=0, size=8)] * len(matrix[0]))
-        for p in range(0,len(matrix)):
-            for j in range(0,len(matrix[0])):
-                for k in range(0,len(matrix)):
-                    temp_[p][j] = temp_[p][j] ^ ( Mixer[p][k].gf_multiply_modular( matrix[k][j],AES_modulus,8)   ) 
         
-        #copy temp_ values to state
-        for i in range(len(matrix)):
-            for j in range(len(matrix[0])):
-                state[i][j] = temp_[i][j]
-        # Convert each BitVector to hex string
-        state = [[element.get_bitvector_in_hex() for element in row]
-                 for row in state]
+        if round != 10:
+            #mix columns using Bitvector library
+            temp_=[]
+            for _ in range(len(matrix)):
+                temp_.append([BitVector(intVal=0, size=8)] * len(matrix[0]))
+            for p in range(0,len(matrix)):
+                for j in range(0,len(matrix[0])):
+                    for k in range(0,len(matrix)):
+                        temp_[p][j] = temp_[p][j] ^ ( Mixer[p][k].gf_multiply_modular( matrix[k][j],AES_modulus,8)   ) 
+            
+            #copy temp_ values to state
+            for i in range(len(matrix)):
+                for j in range(len(matrix[0])):
+                    state[i][j] = temp_[i][j]
+            # Convert each BitVector to hex string
+            state = [[element.get_bitvector_in_hex() for element in row]
+                    for row in state]
         
         # xor the state with the round key
         for i in range(4):
@@ -195,7 +197,10 @@ def aes_for_one_chunk(chunk, key):
                 state[i][j] = hex(int(state[i][j], 16) ^ int(
                     round_key[i][j], 16))[2:].zfill(2)
 
-        print(state)
+        print("state",state)
+    cipher_text= ''.join(state[j][i] for i in range(4) for j in range(4))
+    print("cipher text",cipher_text)
+    return cipher_text
 
 
 # aes encyption function
