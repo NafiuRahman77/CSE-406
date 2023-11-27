@@ -3,6 +3,7 @@
 import sys
 from BitVector import *
 import functools
+import base64
 
 # S-box
 sbox = [
@@ -110,27 +111,14 @@ rcon = [
     ["36", "00", "00", "00"]
 ]
 
-def aes_for_one_chunk(chunk, key):
-    # round 0
-    # convert chunk to hex
-    chunk = chunk.encode('utf-8').hex()
-    # keep the chunk in a 4 by 4 2d array
-    state = [[chunk[i:i+2]
-              for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
-
+def key_scheduling(key):
+    keys=[]
     round_key = key.encode('utf-8').hex()
     # keep the key in a 4 by 4 2d array
     round_key = [[round_key[i:i+2]
                   for i in range(j, len(round_key), 8)] for j in range(0, 8, 2)]
-
-    # xor the state with the round key
-    for i in range(4):
-        for j in range(4):
-            state[i][j] = hex(int(state[i][j], 16) ^ int(
-                round_key[i][j], 16))[2:].zfill(2)
-
+    keys.append(round_key)
     for round in range(1, 11):
-        print("round", round)
         #schedule my round key
         w = [[round_key[j][i] for j in range(4)] for i in range(4)]
         # circular left shift of w[3]
@@ -158,8 +146,29 @@ def aes_for_one_chunk(chunk, key):
                     w[j][k] = hex(int(w[j][k], 16) ^ int(w[j-1][k], 16))[2:].zfill(2)
         
         round_key= [[w[j][i] for j in range(4)] for i in range(4)]
-        print("round key", round_key)    
+        keys.append(round_key)
+    return keys
 
+
+def aes_encrypt_for_one_chunk(chunk, key):
+    # round 0
+    # convert chunk to hex
+    chunk = chunk.encode('utf-8').hex()
+    # keep the chunk in a 4 by 4 2d array
+    state = [[chunk[i:i+2]
+              for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
+
+    keys=key_scheduling(key)
+
+    round_key = keys[0]
+    # xor the state with the round key
+    for i in range(4):
+        for j in range(4):
+            state[i][j] = hex(int(state[i][j], 16) ^ int(
+                round_key[i][j], 16))[2:].zfill(2)
+
+    for round in range(1, 11):   
+        round_key = keys[round]
         # substitute bytes
         for j in range(4):
             for k in range(4):
@@ -198,19 +207,124 @@ def aes_for_one_chunk(chunk, key):
                     round_key[i][j], 16))[2:].zfill(2)
 
         print("state",state)
-    cipher_text= ''.join(state[j][i] for i in range(4) for j in range(4))
-    print("cipher text",cipher_text)
-    return cipher_text
+    #cipher_text_chunk= ''.join(chr(int(state[j][i],16)) for i in range(4) for j in range(4)) # ei line ta tomar jonno important
+   
+        
+    return state
 
 
 # aes encyption function
 def aes_encryption(plaintext, key):
     chunk_size = 128//8
-    chunks = [input_string[i:i + chunk_size].ljust(chunk_size)
-              for i in range(0, len(input_string), chunk_size)]
+    chunks = [plaintext[i:i + chunk_size].ljust(chunk_size)
+              for i in range(0, len(plaintext), chunk_size)]
+     
+    cipher_text=""
+    cipher_hex=""
 
     for chunk in chunks:
-        pass
+        print("chunk",chunk)
+        crypted_state= aes_encrypt_for_one_chunk(chunk, key)
+        cipher_hex_chunk= ''.join(crypted_state[j][i] for i in range(4) for j in range(4))
+        cipher_hex += cipher_hex_chunk
+        cipher_text_chunk= ''.join(chr(int(crypted_state[j][i],16)) for i in range(4) for j in range(4))
+        print("cipher_text_chunk", repr(cipher_text_chunk))
+        cipher_text += cipher_text_chunk
+    
+    return cipher_text,cipher_hex
+
+#aes decryption function
+def aes_decryption(cipher_hex_text, key):
+    
+    #convert cipher_hex_text to a chunks array with 32 hex values in each chunk
+    chunk_size = 32
+    chunks = [cipher_hex_text[i:i + chunk_size].ljust(chunk_size)
+              for i in range(0, len(cipher_hex_text), chunk_size)]
+    
+    for chunk in chunks:
+        print("chunk",chunk)
+        decrypted_state= aes_decrypt_for_one_chunk(chunk, key)
+        decrypted_text_chunk= ''.join(chr(int(decrypted_state[j][i],16)) for i in range(4) for j in range(4))
+        print("decrypted_text_chunk", repr(decrypted_text_chunk))
+        decrypted_text += decrypted_text_chunk
+   
 
 
-aes_for_one_chunk("Two One Nine Two", "Thats my Kung Fu")
+def aes_decrypt_for_one_chunk(chunk, key):
+    # round 0
+    
+    # keep the chunk in a 4 by 4 2d array
+    state = [[chunk[i:i+2]
+              for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
+    
+    print("state",state)
+
+    keys=key_scheduling(key)
+    #invert the keys array
+    keys=keys[::-1]
+    round_key = keys[0]
+    # xor the state with the round key
+    for i in range(4):
+        for j in range(4):
+            state[i][j] = hex(int(state[i][j], 16) ^ int(
+                round_key[i][j], 16))[2:].zfill(2)
+    
+    print("state",state)
+    for round in range(1, 11):
+        print("round",round)
+        round_key = keys[round]
+
+        #inverse shift rows
+        state[1:] = [state[j][-j:] + state[j][:-j] for j in range(1, 4)]
+        print("state",state)
+
+        #inverse substitute bytes
+        for j in range(4):
+            for k in range(4):
+                state[j][k] = hex(inv_sbox[int(state[j][k][0], 16)]
+                                  [int(state[j][k][1], 16)])[2:].zfill(2)
+        print("state",state)
+
+        # xor the state with the round key
+        for i in range(4):
+            for j in range(4):
+                state[i][j] = hex(int(state[i][j], 16) ^ int(
+                    round_key[i][j], 16))[2:].zfill(2)
+        print("state",state)
+
+        # Convert each string to BitVector
+        matrix = [
+            [BitVector(hexstring=element) for element in row]
+            for row in state
+        ]
+        
+        if round !=10:
+            #mix columns using Bitvector library
+            temp_=[]
+            for _ in range(len(matrix)):
+                temp_.append([BitVector(intVal=0, size=8)] * len(matrix[0]))
+            for p in range(0,len(matrix)):
+                for j in range(0,len(matrix[0])):
+                    for k in range(0,len(matrix)):
+                        temp_[p][j] = temp_[p][j] ^ ( InvMixer[p][k].gf_multiply_modular( matrix[k][j],AES_modulus,8)   ) 
+            
+            #copy temp_ values to state
+            for i in range(len(matrix)):
+                for j in range(len(matrix[0])):
+                    state[i][j] = temp_[i][j]
+            # Convert each BitVector to hex string
+            state = [[element.get_bitvector_in_hex() for element in row]
+                    for row in state]
+        
+
+    print("state ", state)   
+        
+#res=aes_encryption("Two One Nine Two", "Thats my Kung Fu")
+#print(repr(res[0]),res[1])
+aes_decrypt_for_one_chunk("29c3505f571420f6402299b31a02d73a","Thats my Kung Fu")
+#s= "That's my Kung Fu"
+#d=s.encode('utf-8').hex()
+#print(d)
+# print d back to string
+#print(bytes.fromhex(d).decode('utf-8'))
+
