@@ -240,13 +240,13 @@ def aes_decryption(cipher_hex_text, key):
     chunk_size = 32
     chunks = [cipher_hex_text[i:i + chunk_size].ljust(chunk_size)
               for i in range(0, len(cipher_hex_text), chunk_size)]
-    
+    decrypted_text=""
     for chunk in chunks:
         print("chunk",chunk)
         decrypted_state= aes_decrypt_for_one_chunk(chunk, key)
         decrypted_text_chunk= ''.join(chr(int(decrypted_state[j][i],16)) for i in range(4) for j in range(4))
-        print("decrypted_text_chunk", repr(decrypted_text_chunk))
         decrypted_text += decrypted_text_chunk
+    print("decrypted_text",decrypted_text)
    
 
 
@@ -317,11 +317,12 @@ def aes_decrypt_for_one_chunk(chunk, key):
                     for row in state]
         
 
-    print("state ", state)   
+    print("state ", state)  
+    return state 
         
-#res=aes_encryption("Two One Nine Two", "Thats my Kung Fu")
-#print(repr(res[0]),res[1])
-aes_decrypt_for_one_chunk("29c3505f571420f6402299b31a02d73a","Thats my Kung Fu")
+res=aes_encryption("Never Gonna Give you up", "BUET CSE19 Batch")
+print(repr(res[0]),res[1])
+aes_decryption(res[1],"BUET CSE19 Batch")
 #s= "That's my Kung Fu"
 #d=s.encode('utf-8').hex()
 #print(d)
