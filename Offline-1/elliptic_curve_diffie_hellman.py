@@ -4,6 +4,12 @@ import random
 import math
 import hashlib
 import sys
+import sympy 
+
+#generate prime number of 128 bits
+def generate_prime_number():
+    prime = sympy.randprime(pow(2,127),pow(2,128))
+    return prime
 
 # define the curve
 a = 1
@@ -54,3 +60,8 @@ def scalar_multiplication(scalar, point):
         if bit == '1':
             result = point_addition(result, point)
     return result
+
+# prime=generate_prime_number()
+#check if the number is prime
+# if sympy.isprime(prime):
+#     print("Prime number is: ",prime)
