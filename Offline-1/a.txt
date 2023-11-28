@@ -1,1 +1,30 @@
-29c3505f571420f6402299b31a02d73a
+# #simple tcp client program
+import socket
+
+import aes as aes
+
+# create a socket object
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# get local machine name
+host = socket.gethostname()
+
+port = 9999
+
+# connection to hostname on the port.
+s.connect((host, port))
+
+plain_text="Two One Nine Two"
+key="That's my Kung Fu"
+s.send(key.encode('ascii'))
+ciphered=aes.aes_encryption(plain_text,key)
+
+s.send(ciphered[1].encode('ascii'))
+
+# Receive no more than 1024 bytes
+msg = s.recv(1024)
+
+print(msg.decode('ascii'))
+
+s.close()
+

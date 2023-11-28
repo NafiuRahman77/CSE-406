@@ -320,9 +320,9 @@ def aes_decrypt_for_one_chunk(chunk, key):
     print("state ", state)  
     return state 
         
-res=aes_encryption("Never Gonna Give you up", "BUET CSE19 Batch")
-print(repr(res[0]),res[1])
-aes_decryption(res[1],"BUET CSE19 Batch")
+# res=aes_encryption("Never Gonna Give you up", "BUET CSE19 Batch")
+# print(repr(res[0]),res[1])
+# aes_decryption(res[1],"BUET CSE19 Batch")
 #s= "That's my Kung Fu"
 #d=s.encode('utf-8').hex()
 #print(d)
