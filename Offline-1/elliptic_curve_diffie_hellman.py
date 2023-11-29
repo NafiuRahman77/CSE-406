@@ -2,7 +2,7 @@
 
 import random
 import math
-import sympy 
+
 import time
 import csv
 
@@ -33,6 +33,25 @@ def get_n(bit):
 
 def get_G(bit):
     return G[bit]
+
+# Function to check if a point is on the curve
+def is_point_on_curve(x, y, bit):
+    return (y**2) % p[bit] == (x**3 + a[bit]*x + b[bit]) % p[bit]
+
+# Function to find a valid point on the curve
+def find_point_on_curve(bit):
+    for x in range(p[bit]):
+        y_squared = (x**3 + a[bit]*x + b[bit]) % p[bit]
+        y = pow(y_squared, (p[bit] + 1) // 4, p[bit])  # Square root modulo p
+        if is_point_on_curve(x, y, bit):
+            return x, y
+        if is_point_on_curve(x, p[bit] - y, bit):
+            return x, p[bit] - y
+
+# Generate a valid point on the curve
+Gx, Gy = find_point_on_curve(128)
+
+print(f"Base Point (Gx, Gy): ({Gx}, {Gy})")
 
 # inverse modulo
 
@@ -82,8 +101,8 @@ def scalar_multiplication(scalar, point, k):
 # k_prB = random.randint(pow(2,127),n[bit]-1)
 
 # # public key generation 
-# k_pbA = scalar_multiplication(k_prA, G[bit], bit)
-# k_pbB = scalar_multiplication(k_prB, G[bit], bit)
+# k_pbA = scalar_multiplication(k_prA, (Gx, Gy), bit)
+# k_pbB = scalar_multiplication(k_prB, (Gx, Gy), bit)
 
 # # shared key generation
 # k_sA = scalar_multiplication(k_prA, k_pbB, bit)
