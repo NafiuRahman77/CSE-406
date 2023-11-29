@@ -2,8 +2,7 @@
 
 import sys
 from BitVector import *
-import functools
-import base64
+import random
 
 # S-box
 sbox = [
@@ -156,7 +155,8 @@ def key_scheduling(key, ishex):
 def aes_encrypt_for_one_chunk(chunk, key, ishex):
     # round 0
     # convert chunk to hex
-    chunk = chunk.encode('utf-8').hex()
+    #chunk = chunk.encode('utf-8').hex()
+    print("chunk bop",chunk)
     # keep the chunk in a 4 by 4 2d array
     state = [[chunk[i:i+2]
               for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
@@ -216,46 +216,75 @@ def aes_encrypt_for_one_chunk(chunk, key, ishex):
     return state
 
 
-# aes encyption function in cbc mode
-def aes_encryption(plaintext, key, ishex=False):
-    chunk_size = 128//8
-    chunks = [plaintext[i:i + chunk_size].ljust(chunk_size)
-              for i in range(0, len(plaintext), chunk_size)]
-     
+# aes encyption function 
+
+def aes_encryption(plain_text, key, ishex):
+    #convert plain_text to a chunks array with 16 characters in each chunk
+    chunk_size = 16
+    chunks = [plain_text[i:i + chunk_size].ljust(chunk_size)
+              for i in range(0, len(plain_text), chunk_size)]
+    #cbc mode
+    iv=iv_g
+
+    #print("chunks",chunks)
     cipher_text=""
     cipher_hex=""
-
     for chunk in chunks:
         #print("chunk",chunk)
-        crypted_state= aes_encrypt_for_one_chunk(chunk, key, ishex)
-        cipher_hex_chunk= ''.join(crypted_state[j][i] for i in range(4) for j in range(4))
-        cipher_hex += cipher_hex_chunk
-        cipher_text_chunk= ''.join(chr(int(crypted_state[j][i],16)) for i in range(4) for j in range(4))
-        #print("cipher_text_chunk", repr(cipher_text_chunk))
+        #xor chunk with iv
+        c=chunk.encode('utf-8').hex()
+        c=BitVector(hexstring=c)
+        c=c ^ BitVector(hexstring=iv)
+        c=c.get_bitvector_in_hex() 
+        print("c",c) 
+
+        cipher_state= aes_encrypt_for_one_chunk(c, key, ishex)
+        cipher_text_chunk= ''.join(chr(int(cipher_state[j][i],16)) for i in range(4) for j in range(4))
+        # create a variable that takes the cipher_state and convert it to string
+        cipher_hex_chunk= ''.join(cipher_state[j][i] for i in range(4) for j in range(4))
         cipher_text += cipher_text_chunk
-    
-    return cipher_text,cipher_hex
+        cipher_hex += cipher_hex_chunk
+        #set iv to cipher_text_chunk
+        iv=cipher_hex_chunk
+        
+    #print("cipher_text",cipher_text)
+    return cipher_text, cipher_hex
 
 
 #aes decryption function
-def aes_decryption(cipher_hex_text, key):
-    
+def aes_decryption(cipher_hex_text, key, ishex):
+    print("cipher_hex_text",cipher_hex_text)
+    print("len",len(cipher_hex_text))
     #convert cipher_hex_text to a chunks array with 32 hex values in each chunk
     chunk_size = 32
     chunks = [cipher_hex_text[i:i + chunk_size].ljust(chunk_size)
               for i in range(0, len(cipher_hex_text), chunk_size)]
     decrypted_text=""
+     
+    iv=iv_g
+    
     for chunk in chunks:
-        #print("chunk",chunk)
-        decrypted_state= aes_decrypt_for_one_chunk(chunk, key)
-        decrypted_text_chunk= ''.join(chr(int(decrypted_state[j][i],16)) for i in range(4) for j in range(4))
-        decrypted_text += decrypted_text_chunk
+        #print("dchunk",chunk)
+        decrypted_state= aes_decrypt_for_one_chunk(chunk, key, ishex)
+        
+        decrypted_hex= ''.join(decrypted_state[j][i] for i in range(4) for j in range(4))
+        #print("decrypted_hex",decrypted_hex)
+        #xor decrypted_hex with iv
+        d=BitVector(hexstring=decrypted_hex)
+        d=d ^ BitVector(hexstring=iv)
+        d=d.get_bitvector_in_hex()
+        #convert decrypted_hex back to string taking two hex values at a time
+        d= ''.join(chr(int(d[i:i+2],16)) for i in range(0, len(decrypted_hex), 2))
+        #set iv to cipher_text_chunk
+        iv=chunk
+        decrypted_text += d
     #print("decrypted_text",decrypted_text)
     return decrypted_text
    
 
 
-def aes_decrypt_for_one_chunk(chunk, key):
+def aes_decrypt_for_one_chunk(chunk, key, ishex):
+
     # round 0
     
     # keep the chunk in a 4 by 4 2d array
@@ -264,7 +293,7 @@ def aes_decrypt_for_one_chunk(chunk, key):
     
     #print("state",state)
 
-    keys=key_scheduling(key,True)
+    keys=key_scheduling(key, ishex)
     #invert the keys array
     keys=keys[::-1]
     round_key = keys[0]
@@ -325,6 +354,17 @@ def aes_decrypt_for_one_chunk(chunk, key):
     #print("state ", state)  
     return state 
 
+
+def generate_iv():
+    #128 bit random initialization vector
+    iv = BitVector(textstring=''.join(chr(random.randint(0, 0xFF)) for i in range(16)))
+    #convert iv to hex
+    iv=iv.get_bitvector_in_hex()
+    #print("iv",iv)
+    return iv
+
+iv_g="01acc50656e8391c3d8924baa00a85d9"
+print("iv_g",iv_g)
 # print(len("e674fa77b66e3746164df8073d01651d"))   
 # res=aes_encryption("Never Gonna Give you up", "e674fa77b66e3746164df8073d01651d", True)
 # print(repr(res[0]),res[1])
@@ -334,4 +374,9 @@ def aes_decrypt_for_one_chunk(chunk, key):
 #print(d)
 # print d back to string
 #print(bytes.fromhex(d).decode('utf-8'))
+
+
+# res=aes_encryption("Never Gonna Give you up", "af519dd5e58159d466167a94c0316924", True)
+# print("chunku",res)
+# print(aes_decryption(res[1],"af519dd5e58159d466167a94c0316924", True))
 

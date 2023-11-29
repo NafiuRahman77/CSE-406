@@ -53,11 +53,12 @@ for i in range(0,128,4):
 
 print("Shared Key: ",secret_hex)
 
-plain_text="Never Gonna Give you up"
+plain_text="Two One Nine Two"
 key=secret_hex
 ciphered=aes.aes_encryption(plain_text,key,True)
 print("Ciphered: ",ciphered[1])
-s.send(ciphered[1].encode('ascii'))
+s.send(pickle.dumps(ciphered[1]))
+print("len", len(ciphered[1].encode('ascii')))
 
 # Receive no more than 1024 bytes
 msg = s.recv(1024)

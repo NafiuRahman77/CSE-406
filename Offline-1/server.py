@@ -60,10 +60,11 @@ while True:
 
     print("Shared Key: ",secret_hex)
  
-    cipher_text = clientsocket.recv(1024)
-    print("Ciphered: ",cipher_text.decode('ascii'))
+    cipher_text = pickle.loads(clientsocket.recv(1024))
+    print("Ciphered: ",cipher_text)
+    
     plain_text = aes.aes_decryption(
-        cipher_text.decode('ascii'), secret_hex)
+        cipher_text, secret_hex, True)
     print("Deciphered: ",plain_text)
     msg = 'Thank you for connecting' + "\r\n"
 
