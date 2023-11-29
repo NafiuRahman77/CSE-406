@@ -2,10 +2,7 @@
 
 import random
 import math
-import hashlib
-import sys
 import sympy 
-
 
 # define the curve
 a = 0xfffffffdfffffffffffffffffffffffc
@@ -14,18 +11,36 @@ p = 0xfffffffdffffffffffffffffffffffff
 n = 0xfffffffe0000000075a30d1b9038a115
 G = (0x161ff7528b899b2d0c28607ca52c5b86, 0xcf5ac8395bafeb13c02da292dded7a83)
 
+# inverse modulo
+
+def extended_gcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, x, y = extended_gcd(b % a, a)
+        return g, y - (b // a) * x, x
+
+def inverse_modulo(a, m):
+    if a < 0 or m <= a:
+        a = a % m
+    gcd, x, y = extended_gcd(a, m)
+    return (x % m + m) % m
+
+
 # point addition
 
 def point_addition(point1, point2):
     if point1 == point2:
-        slope = ((3 * point1[0]**2 + a))*pow(2 * point1[1], -1, p) % p
+        slope = ((3 * point1[0]**2 + a)%p * inverse_modulo(2 * point1[1], p)) % p
     else:
-        slope = ((point2[1] - point1[1]) *
-                 pow(point2[0] - point2[1], -1, p)) % p
+        slope = ((point2[1] - point1[1])%p * inverse_modulo(point2[0] - point1[0], p)) % p
+                
     x = (slope**2 - point1[0] - point2[0]) % p
     y = (slope * (point1[0] - x) - point1[1]) % p
     return (x, y)
 
+
+print(point_addition((5,1), (5,1)))
 # scalar multiplication
 
 def scalar_multiplication(scalar, point):
