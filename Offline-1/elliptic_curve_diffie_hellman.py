@@ -19,6 +19,21 @@ G = {128: (0x161ff7528b899b2d0c28607ca52c5b86, 0xcf5ac8395bafeb13c02da292dded7a8
      }
 
 
+def get_a(bit):
+    return a[bit]
+
+def get_b(bit):
+    return b[bit]
+
+def get_p(bit):
+    return p[bit]
+
+def get_n(bit):
+    return n[bit]
+
+def get_G(bit):
+    return G[bit]
+
 # inverse modulo
 
 def extended_gcd(a, b):
@@ -77,15 +92,20 @@ def scalar_multiplication(scalar, point, k):
 # print("Shared Key: ",k_sA[0])
 # print("Shared Key: ",k_sB[0])
 
-# s=str(bin(k_sA[0])[2:]).zfill(128)
+# s1=str(bin(k_sA[0])[2:]).zfill(128)
+# s2=str(bin(k_sB[0])[2:]).zfill(128)
 # #take each 4 bits and convert to hex
-# hex_key=""
+# hex_key1=""
+# hex_key2=""
 # for i in range(0,128,4):
-#     hex_key+=hex(int(s[i:i+4],2))[2:]
-# print("Shared Key: ",hex_key)
-#no of bits in the shared key
-# print("No of bits in the shared key: ",len(str(bin(k_sA[0])[2:]).zfill(128)))
-# print("No of bits in the shared key: ",len(bin(k_sB[0])[2:]))
+#     hex_key1+=hex(int(s1[i:i+4],2))[2:]
+#     hex_key2+=hex(int(s2[i:i+4],2))[2:]
+
+# print("Shared Key: ",hex_key1)
+# print("Shared Key: ",hex_key2)
+# # no of bits in the shared key
+# print("No of bits in the shared key: ", len(hex_key1))
+# print("No of bits in the shared key: ", len(hex_key2))
 
 #create a function to compute time for generating A, B, and shared key and return the times
 def compute_time(bit):
@@ -104,7 +124,6 @@ def compute_time(bit):
     end_time = time.time()
     time_shared_key = end_time - start_time
     return time_A, time_B, time_shared_key
-    
     
 def main():
     #save the times in seperate arrays for each bit. arrays are of float type
@@ -143,5 +162,5 @@ def main():
     #     writer.writerow(time_B_arr)
     #     writer.writerow(time_shared_key_arr)    
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

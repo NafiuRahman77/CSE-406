@@ -111,9 +111,12 @@ rcon = [
     ["36", "00", "00", "00"]
 ]
 
-def key_scheduling(key):
+def key_scheduling(key, ishex):
     keys=[]
-    round_key = key.encode('utf-8').hex()
+    if ishex==False:
+        round_key = key.encode('utf-8').hex()
+    else:
+        round_key=key
     # keep the key in a 4 by 4 2d array
     round_key = [[round_key[i:i+2]
                   for i in range(j, len(round_key), 8)] for j in range(0, 8, 2)]
@@ -150,7 +153,7 @@ def key_scheduling(key):
     return keys
 
 
-def aes_encrypt_for_one_chunk(chunk, key):
+def aes_encrypt_for_one_chunk(chunk, key, ishex):
     # round 0
     # convert chunk to hex
     chunk = chunk.encode('utf-8').hex()
@@ -158,7 +161,7 @@ def aes_encrypt_for_one_chunk(chunk, key):
     state = [[chunk[i:i+2]
               for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
 
-    keys=key_scheduling(key)
+    keys=key_scheduling(key,ishex)
 
     round_key = keys[0]
     # xor the state with the round key
@@ -206,15 +209,15 @@ def aes_encrypt_for_one_chunk(chunk, key):
                 state[i][j] = hex(int(state[i][j], 16) ^ int(
                     round_key[i][j], 16))[2:].zfill(2)
 
-        print("state",state)
+        #print("state",state)
     #cipher_text_chunk= ''.join(chr(int(state[j][i],16)) for i in range(4) for j in range(4)) # ei line ta tomar jonno important
    
         
     return state
 
 
-# aes encyption function
-def aes_encryption(plaintext, key):
+# aes encyption function in cbc mode
+def aes_encryption(plaintext, key, ishex=False):
     chunk_size = 128//8
     chunks = [plaintext[i:i + chunk_size].ljust(chunk_size)
               for i in range(0, len(plaintext), chunk_size)]
@@ -223,15 +226,16 @@ def aes_encryption(plaintext, key):
     cipher_hex=""
 
     for chunk in chunks:
-        print("chunk",chunk)
-        crypted_state= aes_encrypt_for_one_chunk(chunk, key)
+        #print("chunk",chunk)
+        crypted_state= aes_encrypt_for_one_chunk(chunk, key, ishex)
         cipher_hex_chunk= ''.join(crypted_state[j][i] for i in range(4) for j in range(4))
         cipher_hex += cipher_hex_chunk
         cipher_text_chunk= ''.join(chr(int(crypted_state[j][i],16)) for i in range(4) for j in range(4))
-        print("cipher_text_chunk", repr(cipher_text_chunk))
+        #print("cipher_text_chunk", repr(cipher_text_chunk))
         cipher_text += cipher_text_chunk
     
     return cipher_text,cipher_hex
+
 
 #aes decryption function
 def aes_decryption(cipher_hex_text, key):
@@ -242,11 +246,12 @@ def aes_decryption(cipher_hex_text, key):
               for i in range(0, len(cipher_hex_text), chunk_size)]
     decrypted_text=""
     for chunk in chunks:
-        print("chunk",chunk)
+        #print("chunk",chunk)
         decrypted_state= aes_decrypt_for_one_chunk(chunk, key)
         decrypted_text_chunk= ''.join(chr(int(decrypted_state[j][i],16)) for i in range(4) for j in range(4))
         decrypted_text += decrypted_text_chunk
-    print("decrypted_text",decrypted_text)
+    #print("decrypted_text",decrypted_text)
+    return decrypted_text
    
 
 
@@ -257,9 +262,9 @@ def aes_decrypt_for_one_chunk(chunk, key):
     state = [[chunk[i:i+2]
               for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
     
-    print("state",state)
+    #print("state",state)
 
-    keys=key_scheduling(key)
+    keys=key_scheduling(key,True)
     #invert the keys array
     keys=keys[::-1]
     round_key = keys[0]
@@ -269,28 +274,28 @@ def aes_decrypt_for_one_chunk(chunk, key):
             state[i][j] = hex(int(state[i][j], 16) ^ int(
                 round_key[i][j], 16))[2:].zfill(2)
     
-    print("state",state)
+    #print("state",state)
     for round in range(1, 11):
-        print("round",round)
+        #print("round",round)
         round_key = keys[round]
 
         #inverse shift rows
         state[1:] = [state[j][-j:] + state[j][:-j] for j in range(1, 4)]
-        print("state",state)
+        #print("state",state)
 
         #inverse substitute bytes
         for j in range(4):
             for k in range(4):
                 state[j][k] = hex(inv_sbox[int(state[j][k][0], 16)]
                                   [int(state[j][k][1], 16)])[2:].zfill(2)
-        print("state",state)
+        #print("state",state)
 
         # xor the state with the round key
         for i in range(4):
             for j in range(4):
                 state[i][j] = hex(int(state[i][j], 16) ^ int(
                     round_key[i][j], 16))[2:].zfill(2)
-        print("state",state)
+        #print("state",state)
 
         # Convert each string to BitVector
         matrix = [
@@ -317,12 +322,13 @@ def aes_decrypt_for_one_chunk(chunk, key):
                     for row in state]
         
 
-    print("state ", state)  
+    #print("state ", state)  
     return state 
-        
-# res=aes_encryption("Never Gonna Give you up", "BUET CSE19 Batch")
+
+# print(len("e674fa77b66e3746164df8073d01651d"))   
+# res=aes_encryption("Never Gonna Give you up", "e674fa77b66e3746164df8073d01651d", True)
 # print(repr(res[0]),res[1])
-# aes_decryption(res[1],"BUET CSE19 Batch")
+# print(aes_decryption(res[1],"e674fa77b66e3746164df8073d01651d"))
 #s= "That's my Kung Fu"
 #d=s.encode('utf-8').hex()
 #print(d)
