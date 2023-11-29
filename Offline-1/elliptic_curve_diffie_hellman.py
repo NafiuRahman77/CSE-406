@@ -3,7 +3,8 @@
 import random
 import math
 import sympy 
-
+import time
+import csv
 
 # define the curve
 #make dictionary 'a' like 128:0xfffffffdfffffffffffffffffffffffc
@@ -59,20 +60,88 @@ def scalar_multiplication(scalar, point, k):
     result = (result[0], result[1])
     return result
 
-bit=128
-#generate a random number between 2^(128-1) and n-1
-k_prA = random.randint(pow(2,127),n[bit]-1)
+# bit=128
+# #generate a random number between 2^(128-1) and n-1
+# k_prA = random.randint(pow(2,127),n[bit]-1)
 
-k_prB = random.randint(pow(2,127),n[bit]-1)
+# k_prB = random.randint(pow(2,127),n[bit]-1)
 
-# public key generation 
-k_pbA = scalar_multiplication(k_prA, G[bit], bit)
-k_pbB = scalar_multiplication(k_prB, G[bit], bit)
+# # public key generation 
+# k_pbA = scalar_multiplication(k_prA, G[bit], bit)
+# k_pbB = scalar_multiplication(k_prB, G[bit], bit)
 
-# shared key generation
-k_sA = scalar_multiplication(k_prA, k_pbB, bit)
-k_sB = scalar_multiplication(k_prB, k_pbA , bit)
-# print the shared key
-print("Shared Key: ",k_sA[0])
-print("Shared Key: ",k_sB[0])
+# # shared key generation
+# k_sA = scalar_multiplication(k_prA, k_pbB, bit)
+# k_sB = scalar_multiplication(k_prB, k_pbA , bit)
+# # print the shared key
+# print("Shared Key: ",k_sA[0])
+# print("Shared Key: ",k_sB[0])
 
+# s=str(bin(k_sA[0])[2:]).zfill(128)
+# #take each 4 bits and convert to hex
+# hex_key=""
+# for i in range(0,128,4):
+#     hex_key+=hex(int(s[i:i+4],2))[2:]
+# print("Shared Key: ",hex_key)
+#no of bits in the shared key
+# print("No of bits in the shared key: ",len(str(bin(k_sA[0])[2:]).zfill(128)))
+# print("No of bits in the shared key: ",len(bin(k_sB[0])[2:]))
+
+#create a function to compute time for generating A, B, and shared key and return the times
+def compute_time(bit):
+    k_prA = random.randint(pow(2,127),n[bit]-1)
+    k_prB = random.randint(pow(2,127),n[bit]-1)
+    start_time = time.time()
+    k_pbA = scalar_multiplication(k_prA, G[bit], bit)
+    end_time = time.time()
+    time_A = end_time - start_time
+    start_time = time.time()
+    k_pbB = scalar_multiplication(k_prB, G[bit], bit)
+    end_time = time.time()
+    time_B = end_time - start_time
+    start_time = time.time()
+    k_sA = scalar_multiplication(k_prA, k_pbB, bit)
+    end_time = time.time()
+    time_shared_key = end_time - start_time
+    return time_A, time_B, time_shared_key
+    
+    
+def main():
+    #save the times in seperate arrays for each bit. arrays are of float type
+    time_A_arr = []
+    time_B_arr = []
+    time_shared_key_arr = []
+    for bit in [128, 192, 256]:
+        #take average of 5 trials for each bit
+        time_A = 0
+        time_B = 0
+
+        time_shared_key = 0
+        for i in range(5):
+            time_A_temp, time_B_temp, time_shared_key_temp = compute_time(bit)
+            time_A += time_A_temp
+            time_B += time_B_temp
+            time_shared_key += time_shared_key_temp
+        time_A /= 5
+        time_B /= 5
+        time_shared_key /= 5
+        print("For bit = ", bit)
+        print("Time for generating A: ", "{:.3f}".format(time_A*1000))
+        print("Time for generating B: ", "{:.3f}".format(time_B*1000))
+        print("Time for generating shared key: ", "{:.3f}".format(time_shared_key*1000))
+        print("\n")
+        time_A_arr.append("{:.3f}".format(time_A*1000))
+        time_B_arr.append("{:.3f}".format(time_B*1000))
+        time_shared_key_arr.append("{:.3f}".format(time_shared_key*1000))
+
+    # with open('report.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file)
+    #     #write row headings as bits
+    #     writer.writerow(["128", "192", "256"])
+    #     #write time_A, time_B, time_shared_key as rows
+    #     writer.writerow(time_A_arr)
+    #     writer.writerow(time_B_arr)
+    #     writer.writerow(time_shared_key_arr)    
+
+if __name__ == "__main__":
+    main()
