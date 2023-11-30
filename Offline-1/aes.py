@@ -3,6 +3,7 @@
 import sys
 from BitVector import *
 import random
+import time
 
 # S-box
 sbox = [
@@ -111,6 +112,7 @@ rcon = [
 ]
 
 def key_scheduling(key, ishex):
+    
     keys=[]
     if ishex==False:
         round_key = key.encode('utf-8').hex()
@@ -149,14 +151,16 @@ def key_scheduling(key, ishex):
         
         round_key= [[w[j][i] for j in range(4)] for i in range(4)]
         keys.append(round_key)
+    
     return keys
+ 
 
 
 def aes_encrypt_for_one_chunk(chunk, key, ishex):
     # round 0
     # convert chunk to hex
     #chunk = chunk.encode('utf-8').hex()
-    print("chunk bop",chunk)
+    
     # keep the chunk in a 4 by 4 2d array
     state = [[chunk[i:i+2]
               for i in range(j, len(chunk), 8)] for j in range(0, 8, 2)]
@@ -236,7 +240,6 @@ def aes_encryption(plain_text, key, ishex):
         c=BitVector(hexstring=c)
         c=c ^ BitVector(hexstring=iv)
         c=c.get_bitvector_in_hex() 
-        print("c",c) 
 
         cipher_state= aes_encrypt_for_one_chunk(c, key, ishex)
         cipher_text_chunk= ''.join(chr(int(cipher_state[j][i],16)) for i in range(4) for j in range(4))
@@ -379,4 +382,54 @@ print("iv_g",iv_g)
 # res=aes_encryption("Never Gonna Give you up", "af519dd5e58159d466167a94c0316924", True)
 # print("chunku",res)
 # print(aes_decryption(res[1],"af519dd5e58159d466167a94c0316924", True))
+
+def aes_simulation(plaintext, key):
+    print("Key:")
+    print("In ASCII:", key)
+    print("In Hex:", key.encode('utf-8').hex())
+    print()
+
+    #key scheduling time
+    start_time = time.time()
+    keys=key_scheduling(key, False)
+    
+    end_time = time.time()
+    print("keys",keys)
+    time_key_scheduling = end_time - start_time
+    
+    print("Plaintext:")
+    print("In ASCII:", plaintext)
+    print("In Hex:", plaintext.encode('utf-8').hex())
+    print()
+
+    print("Ciphered Text:")
+    start_time = time.time()
+    ciphertext = aes_encryption(plaintext, key, False)
+    end_time = time.time()
+    time_encryption = end_time - start_time
+    print("In ASCII:", ciphertext[0])
+    print("In Hex:", ciphertext[1])
+    print()
+
+    print("Decrypted Plaintext:")
+    start_time = time.time()
+    decrypted_text = aes_decryption(ciphertext[1], key, False)
+    end_time = time.time()
+    time_decryption = end_time - start_time
+    print("In ASCII:", decrypted_text)
+    print("In Hex:", decrypted_text.encode('utf-8').hex())
+    print()
+
+    print("Key scheduling time:", time_key_scheduling*1000 , "ms")
+    print("Encryption time:", time_encryption*1000 , "ms")
+    print("Decryption time:", time_decryption*1000 , "ms")
+
+def main():
+    aes_simulation("Never Gonna Give you up", "BUET CSE19 BATCH")
+
+if __name__ == "__main__":
+    main()    
+
+
+
 

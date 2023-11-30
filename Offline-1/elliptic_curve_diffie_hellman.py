@@ -2,7 +2,7 @@
 
 import random
 import math
-
+import sympy
 import time
 import csv
 
@@ -35,21 +35,39 @@ def get_G(bit):
     return G[bit]
 
 # Function to check if a point is on the curve
-def is_point_on_curve(x, y, bit):
-    return (y**2) % p[bit] == (x**3 + a[bit]*x + b[bit]) % p[bit]
+def is_point_on_curve(x, y, a, b, p):
+    return (y**2) % p == (x**3 + a*x + b) % p
 
 # Function to find a valid point on the curve
-def find_point_on_curve(bit):
-    for x in range(p[bit]):
-        y_squared = (x**3 + a[bit]*x + b[bit]) % p[bit]
-        y = pow(y_squared, (p[bit] + 1) // 4, p[bit])  # Square root modulo p
-        if is_point_on_curve(x, y, bit):
-            return x, y
-        if is_point_on_curve(x, p[bit] - y, bit):
-            return x, p[bit] - y
+def find_point_on_curve(a,b,p):
+    #use threading on loop from 0 to p
+    # 
+    for x in range(0,p):
+        y_square = (x**3 + a*x + b) % p
+        y = sympy.sqrt_mod(y_square, p)
+        #check if y is integer and(x,y) is on the curve and it is not a singular point where slope is infinite
+        if y != None and is_point_on_curve(x, y, a, b, p):
+            return x,y     
+    return None
 
-# Generate a valid point on the curve
-Gx, Gy = find_point_on_curve(128)
+#generate a,b,p such that the curve is non singular
+def generate_curve_parameters(bit):     
+    #generate 128 bit prime number for p using sympy
+    p = sympy.randprime(pow(2,bit-1),pow(2,bit)-1)
+    while True:
+        #generate a and b
+        a = random.randint(0,p-1)
+        b = random.randint(0,p-1)
+        #check if the curve is non singular
+        if (4*a*a*a + 27*b*b) % p != 0:
+            break
+    return a,b,p
+
+a_ ,b_, p_ = generate_curve_parameters(128)
+
+print(f"a: {a_}, b: {b_}, p: {p_}")
+
+Gx, Gy = find_point_on_curve(a_, b_, p_)
 
 print(f"Base Point (Gx, Gy): ({Gx}, {Gy})")
 
@@ -70,61 +88,61 @@ def inverse_modulo(a, m):
 
 # point addition
 
-def point_addition(point1, point2, k):
+def point_addition(point1, point2, a, b, p):
     if point1 == point2:
-        slope = ((3 * point1[0]**2 + a[k])%p[k] * inverse_modulo(2 * point1[1], p[k])) % p[k]
+        slope = ((3 * point1[0]**2 + a)%p * inverse_modulo(2 * point1[1], p)) % p
     else:
-        slope = ((point2[1] - point1[1])%p[k] * inverse_modulo(point2[0] - point1[0], p[k])) % p[k]
+        slope = ((point2[1] - point1[1])%p * inverse_modulo(point2[0] - point1[0], p)) % p
                 
-    x = (slope**2 - point1[0] - point2[0]) % p[k]
-    y = (slope * (point1[0] - x) - point1[1]) % p[k]
+    x = (slope**2 - point1[0] - point2[0]) % p
+    y = (slope * (point1[0] - x) - point1[1]) % p
     return (x, y)
 
 
 # scalar multiplication
 
-def scalar_multiplication(scalar, point, k):
+def scalar_multiplication(scalar, point, a, b, p):
 
     binary = bin(scalar)[2:]
     result = point
     for bit in binary[1:]:
-        result = point_addition(result, result, k) 
+        result = point_addition(result, result, a, b, p) 
         if bit == '1':
-            result = point_addition(result, point, k)
+            result = point_addition(result, point, a, b, p)
     result = (result[0], result[1])
     return result
 
-# bit=128
-# #generate a random number between 2^(128-1) and n-1
-# k_prA = random.randint(pow(2,127),n[bit]-1)
+bit=128
+#generate a random number between 2^(128-1) and n-1
+k_prA = random.randint(pow(2,127),n[bit]-1)
 
-# k_prB = random.randint(pow(2,127),n[bit]-1)
+k_prB = random.randint(pow(2,127),n[bit]-1)
 
-# # public key generation 
-# k_pbA = scalar_multiplication(k_prA, (Gx, Gy), bit)
-# k_pbB = scalar_multiplication(k_prB, (Gx, Gy), bit)
+# public key generation 
+k_pbA = scalar_multiplication(k_prA, (Gx, Gy), a_, b_, p_)
+k_pbB = scalar_multiplication(k_prB, (Gx, Gy), a_, b_, p_)
 
-# # shared key generation
-# k_sA = scalar_multiplication(k_prA, k_pbB, bit)
-# k_sB = scalar_multiplication(k_prB, k_pbA , bit)
-# # print the shared key
-# print("Shared Key: ",k_sA[0])
-# print("Shared Key: ",k_sB[0])
+# shared key generation
+k_sA = scalar_multiplication(k_prA, k_pbB, a_, b_, p_)
+k_sB = scalar_multiplication(k_prB, k_pbA , a_, b_, p_)
+# print the shared key
+print("Shared Key: ",k_sA[0])
+print("Shared Key: ",k_sB[0])
 
-# s1=str(bin(k_sA[0])[2:]).zfill(128)
-# s2=str(bin(k_sB[0])[2:]).zfill(128)
-# #take each 4 bits and convert to hex
-# hex_key1=""
-# hex_key2=""
-# for i in range(0,128,4):
-#     hex_key1+=hex(int(s1[i:i+4],2))[2:]
-#     hex_key2+=hex(int(s2[i:i+4],2))[2:]
+s1=str(bin(k_sA[0])[2:]).zfill(128)
+s2=str(bin(k_sB[0])[2:]).zfill(128)
+#take each 4 bits and convert to hex
+hex_key1=""
+hex_key2=""
+for i in range(0,128,4):
+    hex_key1+=hex(int(s1[i:i+4],2))[2:]
+    hex_key2+=hex(int(s2[i:i+4],2))[2:]
 
-# print("Shared Key: ",hex_key1)
-# print("Shared Key: ",hex_key2)
-# # no of bits in the shared key
-# print("No of bits in the shared key: ", len(hex_key1))
-# print("No of bits in the shared key: ", len(hex_key2))
+print("Shared Key: ",hex_key1)
+print("Shared Key: ",hex_key2)
+# no of bits in the shared key
+print("No of bits in the shared key: ", len(hex_key1))
+print("No of bits in the shared key: ", len(hex_key2))
 
 #create a function to compute time for generating A, B, and shared key and return the times
 def compute_time(bit):

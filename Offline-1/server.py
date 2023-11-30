@@ -40,7 +40,7 @@ while True:
     # generate private key
     k_prB = random.randint(pow(2, bit-1), n-1)
     # public key generation
-    k_pbB = ecdh.scalar_multiplication(k_prB, G, bit)
+    k_pbB = ecdh.scalar_multiplication(k_prB, G, a, b, p)
     # receive public key from client
     client_public_key = pickle.loads(clientsocket.recv(1024))
     # send public key to client
@@ -48,7 +48,7 @@ while True:
 
     # shared secret generation
     shared_secret = ecdh.scalar_multiplication(
-        k_prB, client_public_key , bit)
+        k_prB, client_public_key , a, b, p)
 
     secret = shared_secret[0]
     secret = str(bin(secret)[2:]).zfill(128)

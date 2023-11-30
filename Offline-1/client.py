@@ -31,7 +31,7 @@ G=ecdh.get_G(bit)
 k_prA = random.randint(pow(2,bit-1),n-1)
 
 # public key generation
-k_pbA = ecdh.scalar_multiplication(k_prA, G, bit)
+k_pbA = ecdh.scalar_multiplication(k_prA, G, a, b, p)
 
 #send public key, k_pbA which is a tuple to server
 s.send(pickle.dumps(k_pbA))
@@ -41,7 +41,7 @@ server_public_key = pickle.loads(s.recv(1024))
 
 
 #shared secret generation
-shared_secret = ecdh.scalar_multiplication(k_prA, server_public_key , bit)
+shared_secret = ecdh.scalar_multiplication(k_prA, server_public_key , a, b, p)
 
 secret = shared_secret[0]
 secret = str(bin(secret)[2:]).zfill(128)
@@ -53,7 +53,7 @@ for i in range(0,128,4):
 
 print("Shared Key: ",secret_hex)
 
-plain_text="Two One Nine Two"
+plain_text="Never Gonna Give you up"
 key=secret_hex
 ciphered=aes.aes_encryption(plain_text,key,True)
 print("Ciphered: ",ciphered[1])
