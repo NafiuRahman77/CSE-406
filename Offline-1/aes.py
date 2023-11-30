@@ -122,7 +122,10 @@ def key_scheduling(key, ishex):
     round_key = [[round_key[i:i+2]
                   for i in range(j, len(round_key), 8)] for j in range(0, 8, 2)]
     keys.append(round_key)
+    
+    time.sleep(0.0000000000000000000000000000000000000001)
     for round in range(1, 11):
+        
         #schedule my round key
         w = [[round_key[j][i] for j in range(4)] for i in range(4)]
         # circular left shift of w[3]

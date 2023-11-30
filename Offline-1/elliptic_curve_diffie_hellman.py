@@ -149,15 +149,15 @@ def compute_time(bit):
     k_prA = random.randint(pow(2,127),n[bit]-1)
     k_prB = random.randint(pow(2,127),n[bit]-1)
     start_time = time.time()
-    k_pbA = scalar_multiplication(k_prA, G[bit], bit)
+    k_pbA = scalar_multiplication(k_prA, G[bit], a[bit], b[bit], p[bit])
     end_time = time.time()
     time_A = end_time - start_time
     start_time = time.time()
-    k_pbB = scalar_multiplication(k_prB, G[bit], bit)
+    k_pbB = scalar_multiplication(k_prB, G[bit], a[bit], b[bit], p[bit])
     end_time = time.time()
     time_B = end_time - start_time
     start_time = time.time()
-    k_sA = scalar_multiplication(k_prA, k_pbB, bit)
+    k_sA = scalar_multiplication(k_prA, k_pbB, a[bit], b[bit], p[bit])
     end_time = time.time()
     time_shared_key = end_time - start_time
     return time_A, time_B, time_shared_key
@@ -190,7 +190,7 @@ def main():
         time_B_arr.append("{:.3f}".format(time_B*1000))
         time_shared_key_arr.append("{:.3f}".format(time_shared_key*1000))
 
-    # with open('report.csv', 'w', newline='') as file:
+    # with open('Offline-1/report.csv', 'w', newline='') as file:
     #     writer = csv.writer(file)
     #     #write row headings as bits
     #     writer.writerow(["128", "192", "256"])
