@@ -430,9 +430,8 @@ def aes_simulation(plaintext, key):
 def main():
     aes_simulation("Never Gonna Give you up", "BUET CSE19 BATCH")
 
-if __name__ == "__main__":
-    main()    
-
+# if __name__ == "__main__":
+#     main()    
 
 
 

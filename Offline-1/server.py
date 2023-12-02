@@ -37,10 +37,6 @@ while True:
     clientsocket, addr = serversocket.accept()
     print("Got a connection from %s" % str(addr))
 
-    # receive iv from client
-    iv = pickle.loads(clientsocket.recv(1024))
-
-
     # generate private key
     k_prB = random.randint(pow(2, bit-1), n-1)
     # public key generation
@@ -63,12 +59,38 @@ while True:
         secret_hex += hex(int(secret[i:i+4], 2))[2:]
 
     print("Shared Key: ",secret_hex)
- 
+
+
+
+    # generate private iv
+    iv_prB = random.randint(pow(2, bit-1), n-1)
+    # public iv generation
+    iv_pbB = ecdh.scalar_multiplication(iv_prB, G, a, b, p)
+    # receive public iv from client
+    client_public_iv = pickle.loads(clientsocket.recv(1024))
+    # send public iv to client
+    clientsocket.send(pickle.dumps(iv_pbB))
+
+    # shared secret generation
+    shared_iv = ecdh.scalar_multiplication(
+        iv_prB, client_public_iv , a, b, p)
+
+    iv = shared_iv[0]
+    iv = str(bin(iv)[2:]).zfill(128)
+
+    iv_hex = ""
+
+    for i in range(0, 128, 4):
+        iv_hex += hex(int(iv[i:i+4], 2))[2:]
+
+    print("Shared iv: ",iv_hex)
+
+
     cipher_text = pickle.loads(clientsocket.recv(1024))
     print("Ciphered: ",cipher_text)
     
     plain_text = aes.aes_decryption(
-        cipher_text, secret_hex, True, iv)
+        cipher_text, secret_hex, True, iv_hex)
     print("Deciphered: ",plain_text)
     msg = 'Thank you for connecting' + "\r\n"
 
