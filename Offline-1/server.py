@@ -61,7 +61,6 @@ while True:
     print("Shared Key: ",secret_hex)
 
 
-
     # generate private iv
     iv_prB = random.randint(pow(2, bit-1), n-1)
     # public iv generation

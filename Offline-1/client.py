@@ -28,7 +28,6 @@ n=ecdh.get_n(bit)
 G=ecdh.get_G(bit)
 
 
-
 #generate private key
 k_prA = random.randint(pow(2,bit-1),n-1)
 
@@ -53,7 +52,6 @@ for i in range(0,128,4):
     secret_hex+=hex(int(secret[i:i+4],2))[2:]
 
 print("Shared Key: ",secret_hex)
-
 
 
 #generate private iv
