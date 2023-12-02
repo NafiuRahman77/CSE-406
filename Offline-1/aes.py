@@ -225,7 +225,7 @@ def aes_encrypt_for_one_chunk(chunk, key, ishex):
 
 # aes encyption function 
 
-def aes_encryption(plain_text, key, ishex):
+def aes_encryption(plain_text, key, ishex, iv_g):
     #convert plain_text to a chunks array with 16 characters in each chunk
     chunk_size = 16
     chunks = [plain_text[i:i + chunk_size].ljust(chunk_size)
@@ -258,7 +258,7 @@ def aes_encryption(plain_text, key, ishex):
 
 
 #aes decryption function
-def aes_decryption(cipher_hex_text, key, ishex):
+def aes_decryption(cipher_hex_text, key, ishex, iv_g):
     print("cipher_hex_text",cipher_hex_text)
     print("len",len(cipher_hex_text))
     #convert cipher_hex_text to a chunks array with 32 hex values in each chunk
@@ -369,8 +369,8 @@ def generate_iv():
     #print("iv",iv)
     return iv
 
-iv_g="01acc50656e8391c3d8924baa00a85d9"
-print("iv_g",iv_g)
+#iv_g="01acc50656e8391c3d8924baa00a85d9"
+# print("iv_g",iv_g)
 # print(len("e674fa77b66e3746164df8073d01651d"))   
 # res=aes_encryption("Never Gonna Give you up", "e674fa77b66e3746164df8073d01651d", True)
 # print(repr(res[0]),res[1])

@@ -37,6 +37,10 @@ while True:
     clientsocket, addr = serversocket.accept()
     print("Got a connection from %s" % str(addr))
 
+    # receive iv from client
+    iv = pickle.loads(clientsocket.recv(1024))
+
+
     # generate private key
     k_prB = random.randint(pow(2, bit-1), n-1)
     # public key generation
@@ -64,7 +68,7 @@ while True:
     print("Ciphered: ",cipher_text)
     
     plain_text = aes.aes_decryption(
-        cipher_text, secret_hex, True)
+        cipher_text, secret_hex, True, iv)
     print("Deciphered: ",plain_text)
     msg = 'Thank you for connecting' + "\r\n"
 

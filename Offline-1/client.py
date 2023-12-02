@@ -27,6 +27,12 @@ p=ecdh.get_p(bit)
 n=ecdh.get_n(bit)
 G=ecdh.get_G(bit)
 
+# generate iv
+iv = aes.generate_iv()
+
+#send iv to server
+s.send(pickle.dumps(iv))
+
 #generate private key
 k_prA = random.randint(pow(2,bit-1),n-1)
 
@@ -53,9 +59,9 @@ for i in range(0,128,4):
 
 print("Shared Key: ",secret_hex)
 
-plain_text="Never Gonna Give you up"
+plain_text="Two One Nine Two"
 key=secret_hex
-ciphered=aes.aes_encryption(plain_text,key,True)
+ciphered=aes.aes_encryption(plain_text,key,True, iv)
 print("Ciphered: ",ciphered[1])
 s.send(pickle.dumps(ciphered[1]))
 print("len", len(ciphered[1].encode('ascii')))
