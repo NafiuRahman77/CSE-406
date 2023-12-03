@@ -21,15 +21,16 @@ s.connect((host, port))
 #get elliptic curve parameters from ecdh
 
 bit=128
-a=ecdh.get_a(bit)
-b=ecdh.get_b(bit)
-p=ecdh.get_p(bit)
-n=ecdh.get_n(bit)
-G=ecdh.get_G(bit)
+a, b, p = ecdh.generate_curve_parameters(bit)
+Gx, Gy = ecdh.find_point_on_curve(a, b, p)
+G = (Gx, Gy)
+
+#send curve parameters to server
+s.send(pickle.dumps((a,b,p,G)))
 
 
 #generate private key
-k_prA = random.randint(pow(2,bit-1),n-1)
+k_prA = random.randint(pow(2,bit-1),pow(2,bit)-1)
 
 # public key generation
 k_pbA = ecdh.scalar_multiplication(k_prA, G, a, b, p)
@@ -55,7 +56,7 @@ print("Shared Key: ",secret_hex)
 
 
 #generate private iv
-iv_prA = random.randint(pow(2,bit-1),n-1)
+iv_prA = random.randint(pow(2,bit-1),pow(2,bit)-1)
 
 # public iv generation
 iv_pbA = ecdh.scalar_multiplication(iv_prA, G, a, b, p)
@@ -80,7 +81,7 @@ for i in range(0,128,4):
 print("Shared iv: ",iv_hex)
 
 
-plain_text="Never Gonna Give you up"
+plain_text="I am nafiu i am a good boy i do bunkugiri"
 key=secret_hex
 ciphered=aes.aes_encryption(plain_text,key,True, iv_hex)
 print("Ciphered: ",ciphered[1])

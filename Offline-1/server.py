@@ -24,12 +24,7 @@ print("Server started")
 
 # get elliptic curve parameters from ecdh
 
-bit = 128
-a = ecdh.get_a(bit)
-b = ecdh.get_b(bit)
-p = ecdh.get_p(bit)
-n = ecdh.get_n(bit)
-G = ecdh.get_G(bit)
+bit=128
 
 
 while True:
@@ -37,8 +32,11 @@ while True:
     clientsocket, addr = serversocket.accept()
     print("Got a connection from %s" % str(addr))
 
+    #receive curve parameters from client
+    a,b,p,G = pickle.loads(clientsocket.recv(1024))
+
     # generate private key
-    k_prB = random.randint(pow(2, bit-1), n-1)
+    k_prB = random.randint(pow(2, bit-1), pow(2,bit)-1)
     # public key generation
     k_pbB = ecdh.scalar_multiplication(k_prB, G, a, b, p)
     # receive public key from client
@@ -62,7 +60,7 @@ while True:
 
 
     # generate private iv
-    iv_prB = random.randint(pow(2, bit-1), n-1)
+    iv_prB = random.randint(pow(2, bit-1), pow(2,bit)-1)
     # public iv generation
     iv_pbB = ecdh.scalar_multiplication(iv_prB, G, a, b, p)
     # receive public iv from client
