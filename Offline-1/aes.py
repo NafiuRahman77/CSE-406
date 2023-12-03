@@ -111,6 +111,15 @@ rcon = [
     ["36", "00", "00", "00"]
 ]
 
+#resize the key to 128 bit
+def resize_key(key):
+    if len(key) < 16:
+        key = key.ljust(16)
+    elif len(key) > 16:
+        key = key[:16]
+    return key
+
+
 
 def key_scheduling(key, ishex):
 
@@ -159,6 +168,7 @@ def key_scheduling(key, ishex):
         keys.append(round_key)
 
     return keys
+
 
 
 def aes_encrypt_for_one_chunk(chunk, key, ishex):
@@ -230,7 +240,7 @@ def aes_encrypt_for_one_chunk(chunk, key, ishex):
 def aes_encryption(plain_text, key, ishex, iv_g):
     # convert plain_text to a chunks array with 16 characters in each chunk
     chunk_size = 16
-    chunks = [plain_text[i:i + chunk_size].ljust(chunk_size)
+    chunks = [plain_text[i:i + chunk_size].ljust(chunk_size, "0")
               for i in range(0, len(plain_text), chunk_size)]
     # cbc mode
     iv = iv_g
@@ -291,6 +301,8 @@ def aes_decryption(cipher_hex_text, key, ishex, iv_g):
         iv = chunk
         decrypted_text += d
     # print("decrypted_text",decrypted_text)
+    #the string has 0 at the end. strip them
+    decrypted_text=decrypted_text.rstrip("0")
     return decrypted_text
 
 
@@ -437,7 +449,8 @@ def aes_simulation(plaintext, key , iv):
 
 def main():
     iv = generate_iv()
-    aes_simulation("Never Gonna Give you up", "BUET CSE19 BATCH", iv )
+    key="BUET CSE19 BATCH"
+    aes_simulation("Never Gonna Give you up", key, iv )
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
