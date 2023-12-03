@@ -263,8 +263,8 @@ def aes_encryption(plain_text, key, ishex, iv_g):
 
 # aes decryption function
 def aes_decryption(cipher_hex_text, key, ishex, iv_g):
-    print("cipher_hex_text", cipher_hex_text)
-    print("len", len(cipher_hex_text))
+    # print("cipher_hex_text", cipher_hex_text)
+    # print("len", len(cipher_hex_text))
     # convert cipher_hex_text to a chunks array with 32 hex values in each chunk
     chunk_size = 32
     chunks = [cipher_hex_text[i:i + chunk_size].ljust(chunk_size)

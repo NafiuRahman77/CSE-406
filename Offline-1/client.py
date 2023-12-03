@@ -85,7 +85,7 @@ plain_text="I am nafiu i am a good boy i do bunkugiri"
 key=secret_hex
 ciphered=aes.aes_encryption(plain_text,key,True, iv_hex)
 print("Ciphered: ",ciphered[1])
-s.send(pickle.dumps(ciphered[1]))
+s.send(pickle.dumps(ciphered))
 print("len", len(ciphered[1].encode('ascii')))
 
 # Receive no more than 1024 bytes
