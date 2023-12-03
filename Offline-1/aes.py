@@ -392,7 +392,7 @@ def generate_iv():
 # print("chunku",res)
 # print(aes_decryption(res[1],"af519dd5e58159d466167a94c0316924", True))
 
-def aes_simulation(plaintext, key):
+def aes_simulation(plaintext, key , iv):
     print("Key:")
     print("In ASCII:", key)
     print("In Hex:", key.encode('utf-8').hex())
@@ -413,20 +413,21 @@ def aes_simulation(plaintext, key):
 
     print("Ciphered Text:")
     start_time = time.time()
-    ciphertext = aes_encryption(plaintext, key, False)
+    ciphertext = aes_encryption(plaintext, key, False, iv)
     end_time = time.time()
     time_encryption = end_time - start_time
-    print("In ASCII:", ciphertext[0])
-    print("In Hex:", ciphertext[1])
+    print("In ASCII:", repr(ciphertext[0]))
+    print("In Hex:", ' '.join(ciphertext[1][i:i+2] for i in range(0, len(ciphertext[1]), 2)))
     print()
 
     print("Decrypted Plaintext:")
     start_time = time.time()
-    decrypted_text = aes_decryption(ciphertext[1], key, False)
+    decrypted_text = aes_decryption(ciphertext[1], key, False, iv)
     end_time = time.time()
     time_decryption = end_time - start_time
     print("In ASCII:", decrypted_text)
-    print("In Hex:", decrypted_text.encode('utf-8').hex())
+    decrypted_text = decrypted_text.encode('utf-8').hex()
+    print("In Hex:", ' '.join(decrypted_text[i:i+2] for i in range(0, len(decrypted_text), 2)))   
     print()
 
     print("Key scheduling time:", time_key_scheduling*1000, "ms")
@@ -435,7 +436,8 @@ def aes_simulation(plaintext, key):
 
 
 def main():
-    aes_simulation("Never Gonna Give you up", "BUET CSE19 BATCH")
+    iv = generate_iv()
+    aes_simulation("Never Gonna Give you up", "BUET CSE19 BATCH", iv )
 
 # if __name__ == "__main__":
 #     main()
