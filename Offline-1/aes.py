@@ -113,14 +113,15 @@ rcon = [
     ["36", "00", "00", "00"]
 ]
 
-#resize the key to 128 bit
+# resize the key to 128 bit
+
+
 def resize_key(key):
     if len(key) < 16:
         key = key.ljust(16)
     elif len(key) > 16:
         key = key[:16]
     return key
-
 
 
 def key_scheduling(key, ishex):
@@ -170,7 +171,6 @@ def key_scheduling(key, ishex):
         keys.append(round_key)
 
     return keys
-
 
 
 def aes_encrypt_for_one_chunk(chunk, key, ishex):
@@ -324,13 +324,13 @@ def generate_iv():
 def aes_cbc_encryption(plain_text, key, ishex, iv_g):
     # convert plain_text to a chunks array with 16 characters in each chunk
     chunk_size = 16
-    
+
     chunks = [plain_text[i:i + chunk_size].ljust(chunk_size)
               for i in range(0, len(plain_text), chunk_size)]
-    
+
     # cbc mode
     iv = iv_g
-    
+
     # print("chunks",chunks)
     cipher_text = ""
     cipher_hex = ""
@@ -341,7 +341,7 @@ def aes_cbc_encryption(plain_text, key, ishex, iv_g):
         c = BitVector(hexstring=c)
         c = c ^ BitVector(hexstring=iv)
         c = c.get_bitvector_in_hex()
-        
+
         cipher_state = aes_encrypt_for_one_chunk(c, key, ishex)
         cipher_text_chunk = ''.join(
             chr(int(cipher_state[j][i], 16)) for i in range(4) for j in range(4))
@@ -387,7 +387,7 @@ def aes_cbc_decryption(cipher_hex_text, key, ishex, iv_g):
         iv = chunk
         decrypted_text += d
     # print("decrypted_text",decrypted_text)
-    #the string has 0 at the end. strip them
+    # the string has 0 at the end. strip them
     return decrypted_text
 
 
@@ -395,37 +395,38 @@ def aes_cbc_decryption(cipher_hex_text, key, ishex, iv_g):
 
 def aes_ctr_encryption(plain_text, key, ishex, iv_g):
     chunk_size = 16
-    chunks = [plain_text[i:i + chunk_size] for i in range(0, len(plain_text), chunk_size)]
+    chunks = [plain_text[i:i + chunk_size]
+              for i in range(0, len(plain_text), chunk_size)]
     # ctr mode iv
-    iv=iv_g
+    iv = iv_g
     print(iv)
-    
+
     cipher_text = ""
     cipher_hex = ""
     for chunk in chunks:
-        chunk=chunk.encode('utf-8').hex()
+        chunk = chunk.encode('utf-8').hex()
         cipher_state = aes_encrypt_for_one_chunk(iv, key, ishex)
         cipher_hex_chunk = ''.join(
             cipher_state[j][i] for i in range(4) for j in range(4))
-        
+
         p = BitVector(hexstring=chunk)
         c = BitVector(hexstring=cipher_hex_chunk)
         c = c ^ p
         c = c.get_bitvector_in_hex()
-        cipher_text_chunk = ''.join( chr(int(c[i:i+2], 16)) for i in range(0, len(c), 2))
+        cipher_text_chunk = ''.join(
+            chr(int(c[i:i+2], 16)) for i in range(0, len(c), 2))
         cipher_hex_chunk = ''.join(c[i:i+2] for i in range(0, len(c), 2))
         cipher_text += cipher_text_chunk
-        cipher_hex += cipher_hex_chunk 
-        #increment iv by 1
+        cipher_hex += cipher_hex_chunk
+        # increment iv by 1
         iv = BitVector(hexstring=iv)
-        a =BitVector(intVal=1, size=128)
-        #convert iv to int from bitvector
+        a = BitVector(intVal=1, size=128)
+        # convert iv to int from bitvector
         iv = iv.int_val()
         iv = iv + a.int_val()
-        #convert iv back to bitvector
-        iv = BitVector(intVal=iv, size=128)     
+        # convert iv back to bitvector
+        iv = BitVector(intVal=iv, size=128)
         iv = iv.get_bitvector_in_hex()
-        
 
     # print("cipher_text",cipher_text)
     return cipher_text, cipher_hex
@@ -434,18 +435,19 @@ def aes_ctr_encryption(plain_text, key, ishex, iv_g):
 # aes decryption function ctr mode
 def aes_ctr_decryption(cipher_hex_text, key, ishex, iv_g):
     chunk_size = 32
-    chunks = [cipher_hex_text[i:i + chunk_size] for i in range(0, len(cipher_hex_text), chunk_size)]
+    chunks = [cipher_hex_text[i:i + chunk_size]
+              for i in range(0, len(cipher_hex_text), chunk_size)]
     # ctr mode iv
-    iv=iv_g
-    
+    iv = iv_g
+
     decrypted_text = ""
     for chunk in chunks:
         decrypted_state = aes_encrypt_for_one_chunk(iv, key, ishex)
         decrypted_hex = ''.join(
             decrypted_state[j][i] for i in range(4) for j in range(4))
         # print("decrypted_hex",decrypted_hex)
-        # xor decrypted_hex with iv 
-        
+        # xor decrypted_hex with iv
+
         c = BitVector(hexstring=chunk)
         d = BitVector(hexstring=decrypted_hex)
         d = d ^ c
@@ -454,56 +456,60 @@ def aes_ctr_decryption(cipher_hex_text, key, ishex, iv_g):
         d = ''.join(chr(int(d[i:i+2], 16))
                     for i in range(0, len(decrypted_hex), 2))
 
-        #increment iv by 1
+        # increment iv by 1
         iv = BitVector(hexstring=iv)
-        a =BitVector(intVal=1, size=128)
-        #convert iv to int from bitvector
+        a = BitVector(intVal=1, size=128)
+        # convert iv to int from bitvector
         iv = iv.int_val()
         iv = iv + a.int_val()
-        #convert iv back to bitvector
+        # convert iv back to bitvector
         iv = BitVector(intVal=iv, size=128)
         iv = iv.get_bitvector_in_hex()
         decrypted_text += d
     # print("decrypted_text",decrypted_text)
-    #the string has 0 at the end. strip them
+    # the string has 0 at the end. strip them
     return decrypted_text
 
 
 def update_element_encrypt(args):
     chunks, iv, key, ishex, i = args
-    
+
     iv = BitVector(hexstring=iv)
-    a =BitVector(intVal=i, size=128)
-    #convert iv to int from bitvector
+    a = BitVector(intVal=i, size=128)
+    # convert iv to int from bitvector
     iv = iv.int_val()
     iv = iv + a.int_val()
-    #convert iv back to bitvector
-    iv = BitVector(intVal=iv, size=128)     
+    # convert iv back to bitvector
+    iv = BitVector(intVal=iv, size=128)
     iv = iv.get_bitvector_in_hex()
     chunk = chunks[i]
-    
-    chunk=chunk.encode('utf-8').hex()
-    
+
+    chunk = chunk.encode('utf-8').hex()
+
     cipher_state = aes_encrypt_for_one_chunk(iv, key, ishex)
     cipher_hex_chunk = ''.join(
         cipher_state[j][i] for i in range(4) for j in range(4))
-    
+
     p = BitVector(hexstring=chunk)
     c = BitVector(hexstring=cipher_hex_chunk)
     c = c ^ p
     c = c.get_bitvector_in_hex()
-    cipher_text_chunk = ''.join( chr(int(c[i:i+2], 16)) for i in range(0, len(c), 2))
+    cipher_text_chunk = ''.join(
+        chr(int(c[i:i+2], 16)) for i in range(0, len(c), 2))
     cipher_hex_chunk = ''.join(c[i:i+2] for i in range(0, len(c), 2))
-    
+
     return cipher_hex_chunk, i
 
-#aes encryption function ctr mode using threading
+# aes encryption function ctr mode using threading
+
+
 def aes_ctr_encryption_thread(plain_text, key, ishex, iv_g):
     chunk_size = 16
-    chunks = [plain_text[i:i + chunk_size] for i in range(0, len(plain_text), chunk_size)]
-    
+    chunks = [plain_text[i:i + chunk_size]
+              for i in range(0, len(plain_text), chunk_size)]
+
     # ctr mode iv
-    iv=iv_g
+    iv = iv_g
 
     # Create a ThreadPoolExecutor with the desired number of threads
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -513,28 +519,28 @@ def aes_ctr_encryption_thread(plain_text, key, ishex, iv_g):
         res = list(executor.map(update_element_encrypt, args_list))
     cipher_text = ""
     cipher_hex = ""
-    pairs=[]
+    pairs = []
     for i in range(len(res)):
         pair = res[i]
         pairs.append(pair)
-    #sort the pairs according to the second element
+    # sort the pairs according to the second element
     pairs.sort(key=lambda x: x[1])
     for i in range(len(pairs)):
         cipher_hex_chunk = pairs[i][0]
         cipher_hex += cipher_hex_chunk
-    
+
     return cipher_text, cipher_hex
 
 
 def update_element_decrypt(args):
     chunks, iv, key, ishex, i = args
-    #increment iv by 1
+    # increment iv by 1
     iv = BitVector(hexstring=iv)
-    a =BitVector(intVal=i, size=128)
-    #convert iv to int from bitvector
+    a = BitVector(intVal=i, size=128)
+    # convert iv to int from bitvector
     iv = iv.int_val()
     iv = iv + a.int_val()
-    #convert iv back to bitvector
+    # convert iv back to bitvector
     iv = BitVector(intVal=iv, size=128)
     iv = iv.get_bitvector_in_hex()
     chunk = chunks[i]
@@ -542,8 +548,8 @@ def update_element_decrypt(args):
     decrypted_hex = ''.join(
         decrypted_state[j][i] for i in range(4) for j in range(4))
 
-    # xor decrypted_hex with iv 
-    
+    # xor decrypted_hex with iv
+
     c = BitVector(hexstring=chunk)
     d = BitVector(hexstring=decrypted_hex)
     d = d ^ c
@@ -552,16 +558,17 @@ def update_element_decrypt(args):
     # convert decrypted_hex back to string taking two hex values at a time
     d = ''.join(chr(int(d[i:i+2], 16))
                 for i in range(0, len(decrypted_hex), 2))
-    
-    return d,i
+
+    return d, i
 
 
 # aes decryption function ctr mode using threading
 def aes_ctr_decryption_thread(cipher_hex_text, key, ishex, iv_g):
     chunk_size = 32
-    chunks = [cipher_hex_text[i:i + chunk_size] for i in range(0, len(cipher_hex_text), chunk_size)]
+    chunks = [cipher_hex_text[i:i + chunk_size]
+              for i in range(0, len(cipher_hex_text), chunk_size)]
     # ctr mode iv
-    iv=iv_g
+    iv = iv_g
 
     # Create a ThreadPoolExecutor with the desired number of threads
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -570,36 +577,37 @@ def aes_ctr_decryption_thread(cipher_hex_text, key, ishex, iv_g):
         # Use executor.map to parallelize the update_element function
         res = list(executor.map(update_element_decrypt, args_list))
     decrypted_text = ""
-    pairs=[]
+    pairs = []
     for i in range(len(res)):
         pair = res[i]
         pairs.append(pair)
-    #sort the pairs according to the second element
+    # sort the pairs according to the second element
     pairs.sort(key=lambda x: x[1])
     for i in range(len(pairs)):
         d = pairs[i][0]
         decrypted_text += d
-    #the string has 0 at the end. strip them
+    # the string has 0 at the end. strip them
     return decrypted_text
 
 
-def aes_simulation(plaintext, key , iv):
+def aes_simulation(plaintext, key, iv):
     print("Key:")
     print("In ASCII:", key)
-    print("In Hex:", key.encode('utf-8').hex())
+    print("In Hex:", ' '.join(key.encode('utf-8').hex()
+          [i:i+2] for i in range(0, len(key.encode('utf-8').hex()), 2)))
     print()
 
     # key scheduling time
     start_time = time.time()
     keys = key_scheduling(key, False)
-
     end_time = time.time()
-    print("keys", keys)
+
     time_key_scheduling = end_time - start_time
 
     print("Plaintext:")
     print("In ASCII:", plaintext)
-    print("In Hex:", ' '.join(plaintext.encode('utf-8').hex()[i:i+2] for i in range(0, len(plaintext.encode('utf-8').hex()), 2)))
+    print("In Hex:", ' '.join(plaintext.encode('utf-8').hex()
+          [i:i+2] for i in range(0, len(plaintext.encode('utf-8').hex()), 2)))
     print()
 
     print("Ciphered Text:")
@@ -607,8 +615,9 @@ def aes_simulation(plaintext, key , iv):
     ciphertext = aes_cbc_encryption(plaintext, key, False, iv)
     end_time = time.time()
     time_encryption = end_time - start_time
-    print("In ASCII:", repr(ciphertext[0]))
-    print("In Hex:", ' '.join(ciphertext[1][i:i+2] for i in range(0, len(ciphertext[1]), 2)))
+    print("In ASCII:", ciphertext[0])
+    print("In Hex:", ' '.join(ciphertext[1][i:i+2]
+          for i in range(0, len(ciphertext[1]), 2)))
     print()
 
     print("Decrypted Plaintext:")
@@ -618,7 +627,8 @@ def aes_simulation(plaintext, key , iv):
     time_decryption = end_time - start_time
     print("In ASCII:", decrypted_text)
     decrypted_text = decrypted_text.encode('utf-8').hex()
-    print("In Hex:", ' '.join(decrypted_text[i:i+2] for i in range(0, len(decrypted_text), 2)))   
+    print("In Hex:", ' '.join(decrypted_text[i:i+2]
+          for i in range(0, len(decrypted_text), 2)))
     print()
 
     print("Key scheduling time:", time_key_scheduling*1000, "ms")
@@ -628,25 +638,22 @@ def aes_simulation(plaintext, key , iv):
 
 def main():
     iv = generate_iv()
-    # iv_plaintext=''.join(chr(int(iv[i:i+2], 16))
-    #                 for i in range(0, len(iv), 2))
     # print("iv",iv)
     # print("iv_plaintext",iv_plaintext.encode('utf-8').hex())
-    key="BUET CSE19 BATCH"
-    key=resize_key(key)
-    aes_simulation("Never gonna give you up, never gonna let u down ", key , iv)
-    time_start = time.time()
-    res=aes_ctr_encryption_thread("Never gonna give you up, never gonna let u down ", key, False, iv)
-    time_end = time.time()
-    print("time encryptio ctr ",(time_end-time_start)*1000)
-    
-    time_start = time.time()
-    print(aes_ctr_decryption_thread(res[1], key, False, iv))
-    time_end = time.time()
-    print("time decryption ctr ",(time_end-time_start)*1000)
+    key = "BUET CSE19 BATCH"
+    key = resize_key(key)
+    aes_simulation("mashroor ekta simp reyazul o simp kintu sadif ar raj simp na ", key, iv)
 
-    
-    
+    # time_start = time.time()
+    # res=aes_ctr_encryption_thread("Never gonna give you up, never gonna let u down ", key, False, iv)
+    # time_end = time.time()
+    # print("time encryption ctr ",(time_end-time_start)*1000)
+
+    # time_start = time.time()
+    # print(aes_ctr_decryption_thread(res[1], key, False, iv))
+    # time_end = time.time()
+    # print("time decryption ctr ",(time_end-time_start)*1000)
+
 
 if __name__ == "__main__":
     main()

@@ -112,37 +112,37 @@ def scalar_multiplication(scalar, point, a, b, p):
     result = (result[0], result[1])
     return result
 
-bit=128
-#generate a random number between 2^(128-1) and n-1
-k_prA = random.randint(pow(2,127),n[bit]-1)
+# bit=128
+# #generate a random number between 2^(128-1) and n-1
+# k_prA = random.randint(pow(2,127),n[bit]-1)
 
-k_prB = random.randint(pow(2,127),n[bit]-1)
+# k_prB = random.randint(pow(2,127),n[bit]-1)
 
-# public key generation 
-k_pbA = scalar_multiplication(k_prA, (Gx, Gy), a_, b_, p_)
-k_pbB = scalar_multiplication(k_prB, (Gx, Gy), a_, b_, p_)
+# # public key generation 
+# k_pbA = scalar_multiplication(k_prA, (Gx, Gy), a_, b_, p_)
+# k_pbB = scalar_multiplication(k_prB, (Gx, Gy), a_, b_, p_)
 
-# shared key generation
-k_sA = scalar_multiplication(k_prA, k_pbB, a_, b_, p_)
-k_sB = scalar_multiplication(k_prB, k_pbA , a_, b_, p_)
-# print the shared key
-print("Shared Key: ",k_sA[0])
-print("Shared Key: ",k_sB[0])
+# # shared key generation
+# k_sA = scalar_multiplication(k_prA, k_pbB, a_, b_, p_)
+# k_sB = scalar_multiplication(k_prB, k_pbA , a_, b_, p_)
+# # print the shared key
+# print("Shared Key: ",k_sA[0])
+# print("Shared Key: ",k_sB[0])
 
-s1=str(bin(k_sA[0])[2:]).zfill(128)
-s2=str(bin(k_sB[0])[2:]).zfill(128)
-#take each 4 bits and convert to hex
-hex_key1=""
-hex_key2=""
-for i in range(0,128,4):
-    hex_key1+=hex(int(s1[i:i+4],2))[2:]
-    hex_key2+=hex(int(s2[i:i+4],2))[2:]
+# s1=str(bin(k_sA[0])[2:]).zfill(128)
+# s2=str(bin(k_sB[0])[2:]).zfill(128)
+# #take each 4 bits and convert to hex
+# hex_key1=""
+# hex_key2=""
+# for i in range(0,128,4):
+#     hex_key1+=hex(int(s1[i:i+4],2))[2:]
+#     hex_key2+=hex(int(s2[i:i+4],2))[2:]
 
-print("Shared Key: ",hex_key1)
-print("Shared Key: ",hex_key2)
-# no of bits in the shared key
-print("No of bits in the shared key: ", len(hex_key1))
-print("No of bits in the shared key: ", len(hex_key2))
+# print("Shared Key: ",hex_key1)
+# print("Shared Key: ",hex_key2)
+# # no of bits in the shared key
+# print("No of bits in the shared key: ", len(hex_key1))
+# print("No of bits in the shared key: ", len(hex_key2))
 
 #create a function to compute time for generating A, B, and shared key and return the times
 def compute_time(bit):
@@ -181,23 +181,20 @@ def main():
         time_A /= 5
         time_B /= 5
         time_shared_key /= 5
-        print("For bit = ", bit)
-        print("Time for generating A: ", "{:.3f}".format(time_A*1000))
-        print("Time for generating B: ", "{:.3f}".format(time_B*1000))
-        print("Time for generating shared key: ", "{:.3f}".format(time_shared_key*1000))
-        print("\n")
+        
         time_A_arr.append("{:.3f}".format(time_A*1000))
         time_B_arr.append("{:.3f}".format(time_B*1000))
         time_shared_key_arr.append("{:.3f}".format(time_shared_key*1000))
+    # print the times in a table
+    print("----------------------------------------------------------------------------------------------------------------------")
+    print("K            |            A                   |                   B              |                R             ")
+    print("----------------------------------------------------------------------------------------------------------------------")
+    print("128          |       ",time_A_arr[0],"                  |",time_B_arr[0],"                           |       ",time_shared_key_arr[0])
+    print("----------------------------------------------------------------------------------------------------------------------")
+    print("192          |       ",time_A_arr[1],"                  |",time_B_arr[1],"                           |       ",time_shared_key_arr[1])
+    print("----------------------------------------------------------------------------------------------------------------------")
+    print("256          |       ",time_A_arr[2],"                 |",time_B_arr[2],"                          |     ",time_shared_key_arr[2])
+    print("----------------------------------------------------------------------------------------------------------------------")   
 
-    # with open('Offline-1/report.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file)
-    #     #write row headings as bits
-    #     writer.writerow(["128", "192", "256"])
-    #     #write time_A, time_B, time_shared_key as rows
-    #     writer.writerow(time_A_arr)
-    #     writer.writerow(time_B_arr)
-    #     writer.writerow(time_shared_key_arr)    
-
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
