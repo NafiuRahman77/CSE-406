@@ -658,6 +658,3 @@ def main():
 
 if __name__ == "__main__": 
     main()
-
-#lorem ipsum string
-s = "Lorem ipsum dolor sit amet, consecte tur adipiscing elit. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed semper quis, max imus nec nisi" 
