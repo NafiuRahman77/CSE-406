@@ -81,9 +81,9 @@ for i in range(0,128,4):
 print("Shared iv: ",iv_hex)
 
 
-plain_text="I am nafiu i am a good boy i do bunkugiri"
+plain_text="Hello World!"
 key=secret_hex
-ciphered=aes.aes_encryption(plain_text,key,True, iv_hex)
+ciphered=aes.aes_cbc_encryption(plain_text,key,True, iv_hex)
 print("Ciphered: ",ciphered[1])
 s.send(pickle.dumps(ciphered))
 print("len", len(ciphered[1].encode('ascii')))

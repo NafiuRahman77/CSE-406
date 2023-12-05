@@ -86,7 +86,7 @@ while True:
     cipher_text = pickle.loads(clientsocket.recv(1024))
     print("Ciphered: ",repr(cipher_text[0]))
     
-    plain_text = aes.aes_decryption(
+    plain_text = aes.aes_cbc_decryption(
         cipher_text[1], secret_hex, True, iv_hex)
     print("Deciphered: ",plain_text)
     msg = 'Thank you for connecting' + "\r\n"
