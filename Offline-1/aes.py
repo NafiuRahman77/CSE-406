@@ -596,6 +596,7 @@ def aes_simulation(plaintext, key, iv):
     print("In Hex:", ' '.join(key.encode('utf-8').hex()
           [i:i+2] for i in range(0, len(key.encode('utf-8').hex()), 2)))
     print()
+    
 
     # key scheduling time
     start_time = time.time()
@@ -642,7 +643,7 @@ def main():
     # print("iv_plaintext",iv_plaintext.encode('utf-8').hex())
     key = "BUET CSE19 BATCH"
     key = resize_key(key)
-    aes_simulation("mashroor ekta simp reyazul o simp kintu sadif ar raj simp na ", key, iv)
+    aes_simulation("Lorem ipsum dolor sit amet, consecte tur adipiscing elit. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed semper quis, max imus nec nisi ", key, iv)
 
     # time_start = time.time()
     # res=aes_ctr_encryption_thread("Never gonna give you up, never gonna let u down ", key, False, iv)
@@ -655,5 +656,8 @@ def main():
     # print("time decryption ctr ",(time_end-time_start)*1000)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
+
+#lorem ipsum string
+s = "Lorem ipsum dolor sit amet, consecte tur adipiscing elit. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed semper quis, max imus nec nisi" 

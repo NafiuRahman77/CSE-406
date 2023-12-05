@@ -86,16 +86,17 @@ def inverse_modulo(a, m):
     gcd, x, y = extended_gcd(a, m)
     return (x % m + m) % m
 
-# point addition
 
-def point_addition(point1, point2, a, b, p):
-    if point1 == point2:
-        slope = ((3 * point1[0]**2 + a)%p * inverse_modulo(2 * point1[1], p)) % p
-    else:
-        slope = ((point2[1] - point1[1])%p * inverse_modulo(point2[0] - point1[0], p)) % p
-                
+def point_addition(point1, point2, a, b, p):  
+    slope = ((point2[1] - point1[1])%p * inverse_modulo(point2[0] - point1[0], p)) % p           
     x = (slope**2 - point1[0] - point2[0]) % p
     y = (slope * (point1[0] - x) - point1[1]) % p
+    return (x, y)
+
+def point_double(point, a, b, p):
+    slope = ((3 * point[0]**2 + a)%p * inverse_modulo(2 * point[1], p)) % p
+    x = (slope**2 - point[0] - point[0]) % p
+    y = (slope * (point[0] - x) - point[1]) % p
     return (x, y)
 
 
@@ -106,43 +107,43 @@ def scalar_multiplication(scalar, point, a, b, p):
     binary = bin(scalar)[2:]
     result = point
     for bit in binary[1:]:
-        result = point_addition(result, result, a, b, p) 
+        result = point_double(result, a, b, p) 
         if bit == '1':
             result = point_addition(result, point, a, b, p)
     result = (result[0], result[1])
     return result
 
-# bit=128
-# #generate a random number between 2^(128-1) and n-1
-# k_prA = random.randint(pow(2,127),n[bit]-1)
+bit=128
+#generate a random number between 2^(128-1) and n-1
+k_prA = random.randint(2,p_-1)
 
-# k_prB = random.randint(pow(2,127),n[bit]-1)
+k_prB = random.randint(2,p_-1)
 
-# # public key generation 
-# k_pbA = scalar_multiplication(k_prA, (Gx, Gy), a_, b_, p_)
-# k_pbB = scalar_multiplication(k_prB, (Gx, Gy), a_, b_, p_)
+# public key generation 
+k_pbA = scalar_multiplication(k_prA, (Gx, Gy), a_, b_, p_)
+k_pbB = scalar_multiplication(k_prB, (Gx, Gy), a_, b_, p_)
 
-# # shared key generation
-# k_sA = scalar_multiplication(k_prA, k_pbB, a_, b_, p_)
-# k_sB = scalar_multiplication(k_prB, k_pbA , a_, b_, p_)
-# # print the shared key
-# print("Shared Key: ",k_sA[0])
-# print("Shared Key: ",k_sB[0])
+# shared key generation
+k_sA = scalar_multiplication(k_prA, k_pbB, a_, b_, p_)
+k_sB = scalar_multiplication(k_prB, k_pbA , a_, b_, p_)
+# print the shared key
+print("Shared Key: ",k_sA[0])
+print("Shared Key: ",k_sB[0])
 
-# s1=str(bin(k_sA[0])[2:]).zfill(128)
-# s2=str(bin(k_sB[0])[2:]).zfill(128)
-# #take each 4 bits and convert to hex
-# hex_key1=""
-# hex_key2=""
-# for i in range(0,128,4):
-#     hex_key1+=hex(int(s1[i:i+4],2))[2:]
-#     hex_key2+=hex(int(s2[i:i+4],2))[2:]
+s1=str(bin(k_sA[0])[2:]).zfill(128)
+s2=str(bin(k_sB[0])[2:]).zfill(128)
+#take each 4 bits and convert to hex
+hex_key1=""
+hex_key2=""
+for i in range(0,128,4):
+    hex_key1+=hex(int(s1[i:i+4],2))[2:]
+    hex_key2+=hex(int(s2[i:i+4],2))[2:]
 
-# print("Shared Key: ",hex_key1)
-# print("Shared Key: ",hex_key2)
-# # no of bits in the shared key
-# print("No of bits in the shared key: ", len(hex_key1))
-# print("No of bits in the shared key: ", len(hex_key2))
+print("Shared Key: ",hex_key1)
+print("Shared Key: ",hex_key2)
+# no of bits in the shared key
+print("No of bits in the shared key: ", len(hex_key1))
+print("No of bits in the shared key: ", len(hex_key2))
 
 #create a function to compute time for generating A, B, and shared key and return the times
 def compute_time(bit):
@@ -196,5 +197,5 @@ def main():
     print("256          |       ",time_A_arr[2],"                 |",time_B_arr[2],"                          |     ",time_shared_key_arr[2])
     print("----------------------------------------------------------------------------------------------------------------------")   
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

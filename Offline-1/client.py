@@ -30,7 +30,7 @@ s.send(pickle.dumps((a,b,p,G)))
 
 
 #generate private key
-k_prA = random.randint(pow(2,bit-1),pow(2,bit)-1)
+k_prA = random.randint(2,p-1)
 
 # public key generation
 k_pbA = ecdh.scalar_multiplication(k_prA, G, a, b, p)
@@ -56,7 +56,7 @@ print("Shared Key: ",secret_hex)
 
 
 #generate private iv
-iv_prA = random.randint(pow(2,bit-1),pow(2,bit)-1)
+iv_prA = random.randint(2,p-1)
 
 # public iv generation
 iv_pbA = ecdh.scalar_multiplication(iv_prA, G, a, b, p)
@@ -81,12 +81,11 @@ for i in range(0,128,4):
 print("Shared iv: ",iv_hex)
 
 
-plain_text="Hello World!"
+plain_text="Lorem ipsum dolor sit amet, consecte tur adipiscing elit. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed semper quis, max imus nec nisi"
 key=secret_hex
 ciphered=aes.aes_cbc_encryption(plain_text,key,True, iv_hex)
 print("Ciphered: ",ciphered[1])
 s.send(pickle.dumps(ciphered))
-print("len", len(ciphered[1].encode('ascii')))
 
 # Receive no more than 1024 bytes
 msg = s.recv(1024)
