@@ -633,8 +633,7 @@ def aes_simulation(plaintext, key, iv):
 
 def main():
     iv = generate_iv()
-    # print("iv",iv)
-    # print("iv_plaintext",iv_plaintext.encode('utf-8').hex())
+    
     key = input("Enter key: ")
     print("CBC mode: ")
     key = resize_key(key)
