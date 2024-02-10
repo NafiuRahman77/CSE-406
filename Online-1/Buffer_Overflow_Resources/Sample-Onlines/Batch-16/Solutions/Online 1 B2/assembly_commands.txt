@@ -1,2 +1,0 @@
-nasm -f elf32 mysh.s -o mysh.o
-xxd -p -c 20 mysh.o
